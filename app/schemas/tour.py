@@ -63,6 +63,7 @@ class TourListItem(BaseModel):
     price: Decimal
     currency: str
     cover_image: str | None
+    is_featured: bool = False
     countries: list[CountryOut] = []
 
 
@@ -88,6 +89,7 @@ class TourCreate(BaseModel):
     currency: str = "USD"
     cover_image: str | None = None
     max_group_size: int | None = None
+    is_featured: bool = False
     country_ids: list[uuid.UUID] = []
     destination_ids: list[uuid.UUID] = []
     itinerary: list[TourItineraryDayCreate] = []
@@ -105,5 +107,6 @@ class TourUpdate(BaseModel):
     cover_image: str | None = None
     max_group_size: int | None = None
     is_active: bool | None = None
+    is_featured: bool | None = None
     country_ids: list[uuid.UUID] | None = None
     destination_ids: list[uuid.UUID] | None = None

@@ -14,6 +14,10 @@ def get_by_id(db: Session, user_id: uuid.UUID) -> User | None:
     return db.query(User).filter(User.id == user_id).first()
 
 
+def list_users(db: Session) -> list[User]:
+    return db.query(User).order_by(User.created_at.desc()).all()
+
+
 def create_user(db: Session, data: UserCreate) -> User:
     user = User(
         full_name=data.full_name,

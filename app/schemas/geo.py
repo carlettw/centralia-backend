@@ -11,6 +11,7 @@ class CountryOut(BaseModel):
     name: Any  # dict yoki lang= berilsa string
     slug: str
     cover_image: str | None = None
+    tour_count: int = 0
 
 
 class CountryCreate(BaseModel):

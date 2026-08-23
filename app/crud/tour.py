@@ -36,6 +36,7 @@ def list_tours(
     min_price: float | None = None,
     max_price: float | None = None,
     search: str | None = None,
+    featured: bool | None = None,
 ) -> tuple[list[Tour], int]:
     query = _base_query().where(Tour.is_active == True)  # noqa: E712
 
@@ -49,6 +50,8 @@ def list_tours(
         query = query.where(Tour.price >= min_price)
     if max_price is not None:
         query = query.where(Tour.price <= max_price)
+    if featured is not None:
+        query = query.where(Tour.is_featured == featured)
     if search:
         # JSONB matnida sodda qidiruv (uz/ru/en barcha kalitlar bo'ylab)
         query = query.where(func.cast(Tour.title, __import__("sqlalchemy").String).ilike(f"%{search}%"))
@@ -73,6 +76,7 @@ def create_tour(db: Session, data: TourCreate) -> Tour:
         currency=data.currency,
         cover_image=data.cover_image,
         max_group_size=data.max_group_size,
+        is_featured=data.is_featured,
     )
     if data.country_ids:
         tour.countries = db.query(Country).filter(Country.id.in_(data.country_ids)).all()

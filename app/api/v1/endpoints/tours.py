@@ -20,7 +20,7 @@ def _to_list_item(t: Tour, lang: str | None) -> TourListItem:
     return TourListItem(
         id=t.id, title=localize(t.title, lang), slug=t.slug, category=t.category,
         duration_days=t.duration_days, duration_nights=t.duration_nights,
-        price=t.price, currency=t.currency, cover_image=t.cover_image,
+        price=t.price, currency=t.currency, cover_image=t.cover_image, is_featured=t.is_featured,
         countries=[CountryOut(id=c.id, name=localize(c.name, lang), slug=c.slug, cover_image=c.cover_image) for c in t.countries],
     )
 
@@ -61,11 +61,12 @@ def list_tours(
     min_price: float | None = None,
     max_price: float | None = None,
     search: str | None = None,
+    featured: bool | None = Query(None, description="true bo'lsa faqat 'Mashhur turlar' (is_featured) qaytadi"),
     lang: str | None = Depends(get_lang_param),
     db: Session = Depends(get_db),
 ):
     items, total = tour_crud.list_tours(
-        db, page, page_size, country, destination, category, min_price, max_price, search
+        db, page, page_size, country, destination, category, min_price, max_price, search, featured
     )
     return Page(
         items=[_to_list_item(t, lang) for t in items],

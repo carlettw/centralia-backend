@@ -46,6 +46,7 @@ class Tour(UUIDPKMixin, TimestampMixin, Base):
 
     cover_image: Mapped[str | None] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
     max_group_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     countries: Mapped[list["Country"]] = relationship(secondary=tour_countries)

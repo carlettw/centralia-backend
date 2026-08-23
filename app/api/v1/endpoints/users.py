@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_admin
+from app.crud import user as user_crud
 from app.models.user import User
 from app.schemas.user import UserOut, UserUpdate
 
@@ -25,3 +26,9 @@ def update_profile(
     db.commit()
     db.refresh(current_user)
     return current_user
+
+
+@router.get("", response_model=list[UserOut], dependencies=[Depends(require_admin)])
+def list_all_users(db: Session = Depends(get_db)):
+    """Barcha foydalanuvchilar ro'yxati (faqat admin)."""
+    return user_crud.list_users(db)

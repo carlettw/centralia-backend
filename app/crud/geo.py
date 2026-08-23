@@ -1,12 +1,20 @@
 import uuid
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from app.models.geo import Country, Destination
+from app.models.tour import Tour, tour_countries
 
 
-def list_countries(db: Session) -> list[Country]:
-    return list(db.execute(select(Country)).scalars())
+def list_countries(db: Session) -> list[tuple[Country, int]]:
+    """Har bir davlat uchun faol turlar sonini ham qaytaradi."""
+    query = (
+        select(Country, func.count(func.distinct(Tour.id)).label("tour_count"))
+        .outerjoin(tour_countries, tour_countries.c.country_id == Country.id)
+        .outerjoin(Tour, (Tour.id == tour_countries.c.tour_id) & (Tour.is_active == True))  # noqa: E712
+        .group_by(Country.id)
+    )
+    return list(db.execute(query).all())
 
 
 def get_country_by_slug(db: Session, slug: str) -> Country | None:

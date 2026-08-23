@@ -14,8 +14,8 @@ router = APIRouter(tags=["Geography"])
 def list_countries(lang: str | None = Depends(get_lang_param), db: Session = Depends(get_db)):
     countries = geo_crud.list_countries(db)
     result = []
-    for c in countries:
-        result.append(CountryOut(id=c.id, name=localize(c.name, lang), slug=c.slug, cover_image=c.cover_image))
+    for c, tour_count in countries:
+        result.append(CountryOut(id=c.id, name=localize(c.name, lang), slug=c.slug, cover_image=c.cover_image, tour_count=tour_count))
     return result
 
 

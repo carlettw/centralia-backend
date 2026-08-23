@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.api.deps import get_current_user
 from app.crud import booking as booking_crud, payment as payment_crud
 from app.models.payment import PaymentProvider
+from app.models.user import User
 from app.schemas.payment import PaymentInitRequest, PaymentInitResponse
 from app.services import payme as payme_service
 from app.services import click as click_service
@@ -17,7 +19,17 @@ router = APIRouter(prefix="/payments", tags=["Payments"])
 
 
 @router.post("/init", response_model=PaymentInitResponse)
-def init_payment(data: PaymentInitRequest, db: Session = Depends(get_db)):
+def init_payment(
+    data: PaymentInitRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    To'lovni boshlash uchun LOGIN SHART. Frontend: 'To'lov qilish' tugmasi bosilganda
+    agar foydalanuvchi login qilmagan bo'lsa, bu so'rov 401 qaytaradi - shu holatda
+    login/ro'yxatdan o'tish oynasini ko'rsating, so'ng qayta chaqiring.
+    Turlarni ko'rish (GET /tours, GET /tours/{slug}) esa login talab qilmaydi.
+    """
     booking = booking_crud.get_by_id(db, data.booking_id)
     if not booking:
         raise HTTPException(status_code=404, detail="Buyurtma topilmadi")

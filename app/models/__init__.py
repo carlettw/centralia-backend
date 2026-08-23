@@ -4,6 +4,7 @@ from app.models.tour import Tour, TourImage, TourItineraryDay, TourCategory, tou
 from app.models.content import Review, Blog
 from app.models.booking import Booking, BookingStatus
 from app.models.payment import Payment, PaymentProvider, PaymentStatus
+from app.models.site_stats import SiteStats
 
 __all__ = [
     "User", "UserRole",
@@ -12,4 +13,5 @@ __all__ = [
     "Review", "Blog",
     "Booking", "BookingStatus",
     "Payment", "PaymentProvider", "PaymentStatus",
+    "SiteStats",
 ]
