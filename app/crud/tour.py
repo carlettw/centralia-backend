@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session, selectinload
 
-from app.models.tour import Tour, TourItineraryDay, TourCategory
+from app.models.tour import Tour, TourItineraryDay, TourImage, TourCategory
 from app.models.geo import Country, Destination
 from app.schemas.tour import TourCreate, TourUpdate
 
@@ -77,6 +77,13 @@ def create_tour(db: Session, data: TourCreate) -> Tour:
         cover_image=data.cover_image,
         max_group_size=data.max_group_size,
         is_featured=data.is_featured,
+        technical_level=data.technical_level,
+        min_age=data.min_age,
+        fitness_level=data.fitness_level,
+        highlights=data.highlights,
+        included=data.included,
+        excluded=data.excluded,
+        faqs=data.faqs,
     )
     if data.country_ids:
         tour.countries = db.query(Country).filter(Country.id.in_(data.country_ids)).all()
@@ -84,10 +91,13 @@ def create_tour(db: Session, data: TourCreate) -> Tour:
         tour.destinations = db.query(Destination).filter(Destination.id.in_(data.destination_ids)).all()
 
     db.add(tour)
-    db.flush()  # tour.id kerak bo'ladi itinerary uchun
+    db.flush()  # tour.id kerak bo'ladi itinerary/rasmlar uchun
 
     for day in data.itinerary:
         db.add(TourItineraryDay(tour_id=tour.id, day_number=day.day_number, title=day.title, description=day.description))
+
+    for idx, url in enumerate(data.images):
+        db.add(TourImage(tour_id=tour.id, image_url=url, order=idx))
 
     db.commit()
     db.refresh(tour)
@@ -95,7 +105,7 @@ def create_tour(db: Session, data: TourCreate) -> Tour:
 
 
 def update_tour(db: Session, tour: Tour, data: TourUpdate) -> Tour:
-    update_data = data.model_dump(exclude_unset=True, exclude={"country_ids", "destination_ids"})
+    update_data = data.model_dump(exclude_unset=True, exclude={"country_ids", "destination_ids", "images"})
     for field, value in update_data.items():
         setattr(tour, field, value)
 
@@ -103,6 +113,12 @@ def update_tour(db: Session, tour: Tour, data: TourUpdate) -> Tour:
         tour.countries = db.query(Country).filter(Country.id.in_(data.country_ids)).all()
     if data.destination_ids is not None:
         tour.destinations = db.query(Destination).filter(Destination.id.in_(data.destination_ids)).all()
+
+    if data.images is not None:
+        # Galereya rasmlarini to'liq almashtiramiz (eskilarini o'chirib, yangilarini kiritamiz)
+        db.query(TourImage).filter(TourImage.tour_id == tour.id).delete()
+        for idx, url in enumerate(data.images):
+            db.add(TourImage(tour_id=tour.id, image_url=url, order=idx))
 
     db.commit()
     db.refresh(tour)

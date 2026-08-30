@@ -29,6 +29,13 @@ class TourItineraryDayCreate(BaseModel):
     description: dict | None = None
 
 
+class TourFaqItem(BaseModel):
+    """Bitta FAQ savol-javob. question/answer - {"uz": "...", "ru": "...", "en": "..."} yoki lang=
+    berilganda string bo'lib qaytadi."""
+    question: Any
+    answer: Any
+
+
 class ReviewOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
@@ -72,9 +79,21 @@ class TourDetail(TourListItem):
     description: Any | None = None
     max_group_size: int | None = None
     destinations: list[DestinationOut] = []
-    images: list[TourImageOut] = []
+    images: list[str] = []
     itinerary: list[TourItineraryDayOut] = []
     reviews: list[ReviewOut] = []
+
+    # Tezkor ma'lumot bloki
+    technical_level: int | None = None
+    min_age: int | None = None
+    fitness_level: int | None = None
+
+    # Har biri {"uz": [...], "ru": [...], "en": [...]} yoki lang= berilganda list[str]
+    highlights: Any | None = None
+    included: Any | None = None
+    excluded: Any | None = None
+
+    faqs: list[TourFaqItem] = []
 
 
 class TourCreate(BaseModel):
@@ -93,6 +112,15 @@ class TourCreate(BaseModel):
     country_ids: list[uuid.UUID] = []
     destination_ids: list[uuid.UUID] = []
     itinerary: list[TourItineraryDayCreate] = []
+    images: list[str] = []
+
+    technical_level: int | None = None
+    min_age: int | None = None
+    fitness_level: int | None = None
+    highlights: dict | None = None
+    included: dict | None = None
+    excluded: dict | None = None
+    faqs: list[dict] = []
 
 
 class TourUpdate(BaseModel):
@@ -110,3 +138,12 @@ class TourUpdate(BaseModel):
     is_featured: bool | None = None
     country_ids: list[uuid.UUID] | None = None
     destination_ids: list[uuid.UUID] | None = None
+    images: list[str] | None = None
+
+    technical_level: int | None = None
+    min_age: int | None = None
+    fitness_level: int | None = None
+    highlights: dict | None = None
+    included: dict | None = None
+    excluded: dict | None = None
+    faqs: list[dict] | None = None

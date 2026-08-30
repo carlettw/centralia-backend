@@ -140,10 +140,10 @@ Productionga chiqarishdan oldin **Payme sandbox**, **Click test muhiti** va **St
 to'liq test qiling — ayniqsa xatolik kodlari va summa validatsiyasini.
 
 ## Yangi migratsiya kerak
-Yangi qo'shildi: `Tour.is_featured`, `Country` uchun `tour_count` (hisoblanadigan, jadval emas),
-`site_stats` jadvali. Quyidagini ishga tushiring:
+Tur (Tour) modeliga yangi maydonlar qo'shildi: `technical_level`, `min_age`, `fitness_level`,
+`highlights`, `included`, `excluded`, `faqs`. Quyidagini ishga tushiring:
 ```bash
-alembic revision --autogenerate -m "add featured tours and site stats"
+alembic revision --autogenerate -m "add tour detail fields (highlights, included, faqs etc)"
 alembic upgrade head
 ```
 

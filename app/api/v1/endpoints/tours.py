@@ -25,6 +25,16 @@ def _to_list_item(t: Tour, lang: str | None) -> TourListItem:
     )
 
 
+def _localize_faqs(faqs: list | None, lang: str | None) -> list[dict]:
+    """faqs - [{"question": {uz,ru,en}, "answer": {uz,ru,en}}, ...] ro'yxatini tilga moslaydi."""
+    if not faqs:
+        return []
+    return [
+        {"question": localize(item.get("question"), lang), "answer": localize(item.get("answer"), lang)}
+        for item in faqs
+    ]
+
+
 def _to_detail(t: Tour, lang: str | None) -> TourDetail:
     base = _to_list_item(t, lang)
     return TourDetail(
@@ -37,7 +47,7 @@ def _to_detail(t: Tour, lang: str | None) -> TourDetail:
                             description=localize(d.description, lang), cover_image=d.cover_image, country_id=d.country_id)
             for d in t.destinations
         ],
-        images=[{"id": i.id, "image_url": i.image_url, "order": i.order} for i in sorted(t.images, key=lambda x: x.order)],
+        images=[i.image_url for i in sorted(t.images, key=lambda x: x.order)],
         itinerary=[
             {"id": day.id, "day_number": day.day_number, "title": localize(day.title, lang), "description": localize(day.description, lang)}
             for day in t.itinerary
@@ -48,6 +58,13 @@ def _to_detail(t: Tour, lang: str | None) -> TourDetail:
              "source": r.source, "source_url": r.source_url}
             for r in t.reviews if r.is_published
         ],
+        technical_level=t.technical_level,
+        min_age=t.min_age,
+        fitness_level=t.fitness_level,
+        highlights=localize(t.highlights, lang),
+        included=localize(t.included, lang),
+        excluded=localize(t.excluded, lang),
+        faqs=_localize_faqs(t.faqs, lang),
     )
 
 

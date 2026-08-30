@@ -49,6 +49,19 @@ class Tour(UUIDPKMixin, TimestampMixin, Base):
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
     max_group_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
+    # Tezkor ma'lumot bloki
+    technical_level: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    min_age: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    fitness_level: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Har biri {"uz": [...], "ru": [...], "en": [...]} shaklida (matnlar massivi)
+    highlights: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    included: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    excluded: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+
+    # [{ "question": {uz,ru,en}, "answer": {uz,ru,en} }, ...]
+    faqs: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+
     countries: Mapped[list["Country"]] = relationship(secondary=tour_countries)
     destinations: Mapped[list["Destination"]] = relationship(secondary=tour_destinations)
 
