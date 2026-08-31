@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     MEDIA_ROOT: str = "media"
     MEDIA_URL: str = "/media/"
 
+    SUPABASE_URL: str = ""
+    SUPABASE_SERVICE_ROLE_KEY: str = ""
+    SUPABASE_STORAGE_BUCKET: str = "media"
+
     SUPPORTED_LANGUAGES: List[str] = ["uz", "ru", "en"]
     DEFAULT_LANGUAGE: str = "uz"
 
