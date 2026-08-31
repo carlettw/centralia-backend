@@ -140,11 +140,11 @@ Productionga chiqarishdan oldin **Payme sandbox**, **Click test muhiti** va **St
 to'liq test qiling — ayniqsa xatolik kodlari va summa validatsiyasini.
 
 ## Yangi migratsiya kerak
-Qo'shildi: `Tour.map_embed_url`, `Tour.pricing_options`, `TourItineraryDay` uchun
-`what_to_expect`, `meals_included`, `transportation`, `gallery`, `accommodation`,
-va yangi `contact_messages` jadvali. Quyidagini ishga tushiring:
+`SiteStats` jadvalidan `satisfaction_percent`, `completed_trips`, `happy_travelers` ustunlari
+OLIB TASHLANDI (endi jonli hisoblanadi, saqlanmaydi) — faqat `years_experience` qoladi.
+Quyidagini ishga tushiring:
 ```bash
-alembic revision --autogenerate -m "add pricing options, itinerary details, contact messages"
+alembic revision --autogenerate -m "site stats: auto-calculate trips, travelers, satisfaction"
 alembic upgrade head
 ```
 
