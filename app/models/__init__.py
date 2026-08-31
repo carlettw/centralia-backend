@@ -5,6 +5,7 @@ from app.models.content import Review, Blog
 from app.models.booking import Booking, BookingStatus
 from app.models.payment import Payment, PaymentProvider, PaymentStatus
 from app.models.site_stats import SiteStats
+from app.models.contact import ContactMessage
 
 __all__ = [
     "User", "UserRole",
@@ -14,4 +15,5 @@ __all__ = [
     "Booking", "BookingStatus",
     "Payment", "PaymentProvider", "PaymentStatus",
     "SiteStats",
+    "ContactMessage",
 ]

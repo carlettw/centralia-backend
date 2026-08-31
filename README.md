@@ -140,10 +140,11 @@ Productionga chiqarishdan oldin **Payme sandbox**, **Click test muhiti** va **St
 to'liq test qiling — ayniqsa xatolik kodlari va summa validatsiyasini.
 
 ## Yangi migratsiya kerak
-Tur (Tour) modeliga yangi maydonlar qo'shildi: `technical_level`, `min_age`, `fitness_level`,
-`highlights`, `included`, `excluded`, `faqs`. Quyidagini ishga tushiring:
+Qo'shildi: `Tour.map_embed_url`, `Tour.pricing_options`, `TourItineraryDay` uchun
+`what_to_expect`, `meals_included`, `transportation`, `gallery`, `accommodation`,
+va yangi `contact_messages` jadvali. Quyidagini ishga tushiring:
 ```bash
-alembic revision --autogenerate -m "add tour detail fields (highlights, included, faqs etc)"
+alembic revision --autogenerate -m "add pricing options, itinerary details, contact messages"
 alembic upgrade head
 ```
 

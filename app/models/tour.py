@@ -62,6 +62,12 @@ class Tour(UUIDPKMixin, TimestampMixin, Base):
     # [{ "question": {uz,ru,en}, "answer": {uz,ru,en} }, ...]
     faqs: Mapped[list | None] = mapped_column(JSONB, nullable=True)
 
+    map_embed_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+
+    # [{ "id": "...", "type": "group"|"private", "label": {uz,ru,en}, "price": 489,
+    #    "currency": "USD", "min_people": 2, "max_people": 6 }, ...]
+    pricing_options: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+
     countries: Mapped[list["Country"]] = relationship(secondary=tour_countries)
     destinations: Mapped[list["Destination"]] = relationship(secondary=tour_destinations)
 
@@ -89,5 +95,17 @@ class TourItineraryDay(UUIDPKMixin, Base):
     day_number: Mapped[int] = mapped_column(Integer)
     title: Mapped[dict] = mapped_column(JSONB)
     description: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+
+    # {"uz": [...], "ru": [...], "en": [...]}
+    what_to_expect: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # ["breakfast", "lunch", "dinner"]
+    meals_included: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    # {"type": "driving"|"train"|"flight"|"walking", "duration": "1-2hrs", "distance": "5-8km"}
+    transportation: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # ["/media/itinerary/xxx.jpg", ...]
+    gallery: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    # {"name": "...", "stars": 3, "address": "...", "map_url": "...", "check_in": "14:00",
+    #  "check_out": "14:00", "rooms": {uz,ru,en}, "photos": [...]}
+    accommodation: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     tour: Mapped["Tour"] = relationship(back_populates="itinerary")

@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -31,25 +29,19 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     return Token(
         access_token=create_access_token(user.id),
         refresh_token=create_refresh_token(user.id),
-        user=user,
     )
 
 
 @router.post("/refresh", response_model=Token)
-def refresh(data: TokenRefreshRequest, db: Session = Depends(get_db)):
+def refresh(data: TokenRefreshRequest):
     payload = decode_token(data.refresh_token)
     if not payload or payload.get("type") != "refresh":
         raise HTTPException(status_code=401, detail="Refresh token yaroqsiz")
 
     user_id = payload["sub"]
-    user = user_crud.get_by_id(db, uuid.UUID(user_id))
-    if not user or not user.is_active:
-        raise HTTPException(status_code=401, detail="Foydalanuvchi topilmadi")
-
     return Token(
-        access_token=create_access_token(user.id),
-        refresh_token=create_refresh_token(user.id),
-        user=user,
+        access_token=create_access_token(user_id),
+        refresh_token=create_refresh_token(user_id),
     )
 
 

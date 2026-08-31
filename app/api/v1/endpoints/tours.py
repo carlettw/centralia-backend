@@ -35,6 +35,40 @@ def _localize_faqs(faqs: list | None, lang: str | None) -> list[dict]:
     ]
 
 
+def _localize_pricing_options(options: list | None, lang: str | None) -> list[dict]:
+    if not options:
+        return []
+    result = []
+    for opt in options:
+        opt = dict(opt)
+        opt["label"] = localize(opt.get("label"), lang)
+        result.append(opt)
+    return result
+
+
+def _localize_accommodation(accommodation: dict | None, lang: str | None) -> dict | None:
+    if not accommodation:
+        return None
+    acc = dict(accommodation)
+    if "rooms" in acc:
+        acc["rooms"] = localize(acc.get("rooms"), lang)
+    return acc
+
+
+def _itinerary_day_to_dict(day, lang: str | None) -> dict:
+    return {
+        "id": day.id,
+        "day_number": day.day_number,
+        "title": localize(day.title, lang),
+        "description": localize(day.description, lang),
+        "what_to_expect": localize(day.what_to_expect, lang),
+        "meals_included": day.meals_included or [],
+        "transportation": day.transportation,
+        "gallery": day.gallery or [],
+        "accommodation": _localize_accommodation(day.accommodation, lang),
+    }
+
+
 def _to_detail(t: Tour, lang: str | None) -> TourDetail:
     base = _to_list_item(t, lang)
     return TourDetail(
@@ -48,10 +82,7 @@ def _to_detail(t: Tour, lang: str | None) -> TourDetail:
             for d in t.destinations
         ],
         images=[i.image_url for i in sorted(t.images, key=lambda x: x.order)],
-        itinerary=[
-            {"id": day.id, "day_number": day.day_number, "title": localize(day.title, lang), "description": localize(day.description, lang)}
-            for day in t.itinerary
-        ],
+        itinerary=[_itinerary_day_to_dict(day, lang) for day in t.itinerary],
         reviews=[
             {"id": r.id, "reviewer_name": r.reviewer_name, "reviewer_country": r.reviewer_country,
              "rating": r.rating, "text": r.text, "images": r.images or [], "is_verified": r.is_verified,
@@ -65,6 +96,8 @@ def _to_detail(t: Tour, lang: str | None) -> TourDetail:
         included=localize(t.included, lang),
         excluded=localize(t.excluded, lang),
         faqs=_localize_faqs(t.faqs, lang),
+        map_embed_url=t.map_embed_url,
+        pricing_options=_localize_pricing_options(t.pricing_options, lang),
     )
 
 

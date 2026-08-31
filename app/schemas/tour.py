@@ -8,11 +8,22 @@ from app.models.tour import TourCategory
 from app.schemas.geo import CountryOut, DestinationOut
 
 
-class TourImageOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: uuid.UUID
-    image_url: str
-    order: int
+class TourAccommodationOut(BaseModel):
+    """Kunlik dasturdagi mehmonxona ma'lumoti (ixtiyoriy - masalan jo'nab ketish kunida bo'lmaydi)."""
+    name: str | None = None
+    stars: int | None = None
+    address: str | None = None
+    map_url: str | None = None
+    check_in: str | None = None
+    check_out: str | None = None
+    rooms: Any | None = None  # {uz,ru,en} yoki lang= berilganda string
+    photos: list[str] = []
+
+
+class TourTransportationOut(BaseModel):
+    type: str | None = None  # "driving" | "train" | "flight" | "walking"
+    duration: str | None = None
+    distance: str | None = None
 
 
 class TourItineraryDayOut(BaseModel):
@@ -21,12 +32,22 @@ class TourItineraryDayOut(BaseModel):
     day_number: int
     title: Any
     description: Any | None = None
+    what_to_expect: Any | None = None  # {uz,ru,en} yoki lang= berilganda list[str]
+    meals_included: list[str] = []
+    transportation: TourTransportationOut | None = None
+    gallery: list[str] = []
+    accommodation: TourAccommodationOut | None = None
 
 
 class TourItineraryDayCreate(BaseModel):
     day_number: int
     title: dict
     description: dict | None = None
+    what_to_expect: dict | None = None
+    meals_included: list[str] = []
+    transportation: dict | None = None
+    gallery: list[str] = []
+    accommodation: dict | None = None
 
 
 class TourFaqItem(BaseModel):
@@ -34,6 +55,26 @@ class TourFaqItem(BaseModel):
     berilganda string bo'lib qaytadi."""
     question: Any
     answer: Any
+
+
+class TourPricingOptionOut(BaseModel):
+    id: str
+    type: str  # "group" | "private"
+    label: Any  # {uz,ru,en} yoki lang= berilganda string
+    price: Decimal
+    currency: str
+    min_people: int | None = None
+    max_people: int | None = None
+
+
+class TourPricingOptionCreate(BaseModel):
+    id: str | None = None  # bo'sh qoldirilsa avtomatik generatsiya qilinadi
+    type: str
+    label: dict
+    price: Decimal
+    currency: str = "USD"
+    min_people: int | None = None
+    max_people: int | None = None
 
 
 class ReviewOut(BaseModel):
@@ -83,17 +124,17 @@ class TourDetail(TourListItem):
     itinerary: list[TourItineraryDayOut] = []
     reviews: list[ReviewOut] = []
 
-    # Tezkor ma'lumot bloki
     technical_level: int | None = None
     min_age: int | None = None
     fitness_level: int | None = None
 
-    # Har biri {"uz": [...], "ru": [...], "en": [...]} yoki lang= berilganda list[str]
     highlights: Any | None = None
     included: Any | None = None
     excluded: Any | None = None
 
     faqs: list[TourFaqItem] = []
+    map_embed_url: str | None = None
+    pricing_options: list[TourPricingOptionOut] = []
 
 
 class TourCreate(BaseModel):
@@ -121,6 +162,8 @@ class TourCreate(BaseModel):
     included: dict | None = None
     excluded: dict | None = None
     faqs: list[dict] = []
+    map_embed_url: str | None = None
+    pricing_options: list[TourPricingOptionCreate] = []
 
 
 class TourUpdate(BaseModel):
@@ -139,6 +182,7 @@ class TourUpdate(BaseModel):
     country_ids: list[uuid.UUID] | None = None
     destination_ids: list[uuid.UUID] | None = None
     images: list[str] | None = None
+    itinerary: list[TourItineraryDayCreate] | None = None
 
     technical_level: int | None = None
     min_age: int | None = None
@@ -147,3 +191,5 @@ class TourUpdate(BaseModel):
     included: dict | None = None
     excluded: dict | None = None
     faqs: list[dict] | None = None
+    map_embed_url: str | None = None
+    pricing_options: list[TourPricingOptionCreate] | None = None

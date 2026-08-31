@@ -5,7 +5,32 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models.tour import Tour, TourItineraryDay, TourImage, TourCategory
 from app.models.geo import Country, Destination
-from app.schemas.tour import TourCreate, TourUpdate
+from app.schemas.tour import TourCreate, TourUpdate, TourItineraryDayCreate, TourPricingOptionCreate
+
+
+def _pricing_options_to_dicts(options: list[TourPricingOptionCreate]) -> list[dict]:
+    """Har bir narx variantiga (agar berilmagan bo'lsa) yangi UUID id beradi."""
+    result = []
+    for opt in options:
+        d = opt.model_dump()
+        d["id"] = d["id"] or str(uuid.uuid4())
+        d["price"] = float(d["price"])
+        result.append(d)
+    return result
+
+
+def _create_itinerary_day(db: Session, tour_id: uuid.UUID, day: TourItineraryDayCreate) -> None:
+    db.add(TourItineraryDay(
+        tour_id=tour_id,
+        day_number=day.day_number,
+        title=day.title,
+        description=day.description,
+        what_to_expect=day.what_to_expect,
+        meals_included=day.meals_included,
+        transportation=day.transportation,
+        gallery=day.gallery,
+        accommodation=day.accommodation,
+    ))
 
 
 def _base_query():
@@ -84,6 +109,8 @@ def create_tour(db: Session, data: TourCreate) -> Tour:
         included=data.included,
         excluded=data.excluded,
         faqs=data.faqs,
+        map_embed_url=data.map_embed_url,
+        pricing_options=_pricing_options_to_dicts(data.pricing_options),
     )
     if data.country_ids:
         tour.countries = db.query(Country).filter(Country.id.in_(data.country_ids)).all()
@@ -94,7 +121,7 @@ def create_tour(db: Session, data: TourCreate) -> Tour:
     db.flush()  # tour.id kerak bo'ladi itinerary/rasmlar uchun
 
     for day in data.itinerary:
-        db.add(TourItineraryDay(tour_id=tour.id, day_number=day.day_number, title=day.title, description=day.description))
+        _create_itinerary_day(db, tour.id, day)
 
     for idx, url in enumerate(data.images):
         db.add(TourImage(tour_id=tour.id, image_url=url, order=idx))
@@ -105,7 +132,9 @@ def create_tour(db: Session, data: TourCreate) -> Tour:
 
 
 def update_tour(db: Session, tour: Tour, data: TourUpdate) -> Tour:
-    update_data = data.model_dump(exclude_unset=True, exclude={"country_ids", "destination_ids", "images"})
+    update_data = data.model_dump(
+        exclude_unset=True, exclude={"country_ids", "destination_ids", "images", "itinerary", "pricing_options"}
+    )
     for field, value in update_data.items():
         setattr(tour, field, value)
 
@@ -114,11 +143,20 @@ def update_tour(db: Session, tour: Tour, data: TourUpdate) -> Tour:
     if data.destination_ids is not None:
         tour.destinations = db.query(Destination).filter(Destination.id.in_(data.destination_ids)).all()
 
+    if data.pricing_options is not None:
+        tour.pricing_options = _pricing_options_to_dicts(data.pricing_options)
+
     if data.images is not None:
         # Galereya rasmlarini to'liq almashtiramiz (eskilarini o'chirib, yangilarini kiritamiz)
         db.query(TourImage).filter(TourImage.tour_id == tour.id).delete()
         for idx, url in enumerate(data.images):
             db.add(TourImage(tour_id=tour.id, image_url=url, order=idx))
+
+    if data.itinerary is not None:
+        # Kunlik dasturni to'liq almashtiramiz (eskilarini o'chirib, yangilarini kiritamiz)
+        db.query(TourItineraryDay).filter(TourItineraryDay.tour_id == tour.id).delete()
+        for day in data.itinerary:
+            _create_itinerary_day(db, tour.id, day)
 
     db.commit()
     db.refresh(tour)
