@@ -33,6 +33,7 @@ class BookingOut(BaseModel):
     total_price: Decimal
     currency: str
     status: BookingStatus
+    notes: str | None = None
     created_at: datetime
 
     @computed_field
