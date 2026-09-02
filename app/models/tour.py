@@ -68,6 +68,12 @@ class Tour(UUIDPKMixin, TimestampMixin, Base):
     #    "currency": "USD", "min_people": 2, "max_people": 6 }, ...]
     pricing_options: Mapped[list | None] = mapped_column(JSONB, nullable=True)
 
+    # [{ "order": 1, "type": "start"|"stop"|"end", "name": {uz,ru,en}, "address": {uz,ru,en} (ixtiyoriy),
+    #    "activity_type": "photo_stop"|"guided_tour"|"shopping" (ixtiyoriy, faqat "stop" uchun),
+    #    "duration_minutes": 30 (ixtiyoriy), "has_extra_fee": true (ixtiyoriy),
+    #    "latitude": 39.654, "longitude": 66.9749 }, ...]
+    route_points: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+
     countries: Mapped[list["Country"]] = relationship(secondary=tour_countries)
     destinations: Mapped[list["Destination"]] = relationship(secondary=tour_destinations)
 
