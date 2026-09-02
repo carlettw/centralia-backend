@@ -111,6 +111,7 @@ def create_tour(db: Session, data: TourCreate) -> Tour:
         faqs=data.faqs,
         map_embed_url=data.map_embed_url,
         pricing_options=_pricing_options_to_dicts(data.pricing_options),
+        route_points=[rp.model_dump() for rp in data.route_points],
     )
     if data.country_ids:
         tour.countries = db.query(Country).filter(Country.id.in_(data.country_ids)).all()
