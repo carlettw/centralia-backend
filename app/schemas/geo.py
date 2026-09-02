@@ -20,6 +20,12 @@ class CountryCreate(BaseModel):
     cover_image: str | None = None
 
 
+class CountryUpdate(BaseModel):
+    name: dict | None = None
+    slug: str | None = None
+    cover_image: str | None = None
+
+
 class DestinationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,3 +43,11 @@ class DestinationCreate(BaseModel):
     description: dict | None = None
     cover_image: str | None = None
     country_id: uuid.UUID
+
+
+class DestinationUpdate(BaseModel):
+    name: dict | None = None
+    slug: str | None = None
+    description: dict | None = None
+    cover_image: str | None = None
+    country_id: uuid.UUID | None = None
