@@ -55,6 +55,20 @@ def _localize_accommodation(accommodation: dict | None, lang: str | None) -> dic
     return acc
 
 
+def _localize_route_points(points: list | None, lang: str | None) -> list[dict]:
+    """route_points - [{"name": {uz,ru,en}, "address": {uz,ru,en}, ...}, ...] ro'yxatini tilga moslaydi."""
+    if not points:
+        return []
+    result = []
+    for p in points:
+        p = dict(p)
+        p["name"] = localize(p.get("name"), lang)
+        if p.get("address"):
+            p["address"] = localize(p.get("address"), lang)
+        result.append(p)
+    return sorted(result, key=lambda x: x.get("order", 0))
+
+
 def _itinerary_day_to_dict(day, lang: str | None) -> dict:
     return {
         "id": day.id,
@@ -98,6 +112,7 @@ def _to_detail(t: Tour, lang: str | None) -> TourDetail:
         faqs=_localize_faqs(t.faqs, lang),
         map_embed_url=t.map_embed_url,
         pricing_options=_localize_pricing_options(t.pricing_options, lang),
+        route_points=_localize_route_points(t.route_points, lang),
     )
 
 
