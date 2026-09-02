@@ -3,7 +3,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from app.models.geo import Country, Destination
-from app.models.tour import Tour, tour_countries
+from app.models.tour import Tour, tour_countries, tour_destinations
 
 
 def list_countries(db: Session) -> list[tuple[Country, int]]:
@@ -29,6 +29,35 @@ def create_country(db: Session, name: dict, slug: str, cover_image: str | None) 
     return country
 
 
+def get_country_by_id(db: Session, country_id: uuid.UUID) -> Country | None:
+    return db.execute(select(Country).where(Country.id == country_id)).scalar_one_or_none()
+
+
+def update_country(db: Session, country: Country, data) -> Country:
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(country, field, value)
+    db.commit()
+    db.refresh(country)
+    return country
+
+
+def count_country_dependencies(db: Session, country_id: uuid.UUID) -> dict:
+    """Ushbu davlatga bog'liq destinations va tours sonini qaytaradi (o'chirishdan oldin tekshirish uchun)."""
+    destinations_count = db.execute(
+        select(func.count()).select_from(Destination).where(Destination.country_id == country_id)
+    ).scalar_one()
+    tours_count = db.execute(
+        select(func.count(func.distinct(tour_countries.c.tour_id))).where(tour_countries.c.country_id == country_id)
+    ).scalar_one()
+    return {"destinations": destinations_count, "tours": tours_count}
+
+
+def delete_country(db: Session, country: Country) -> None:
+    db.delete(country)
+    db.commit()
+
+
 def list_destinations(db: Session, country_slug: str | None = None) -> list[Destination]:
     query = select(Destination)
     if country_slug:
@@ -46,3 +75,30 @@ def create_destination(db: Session, data) -> Destination:
     db.commit()
     db.refresh(destination)
     return destination
+
+
+def get_destination_by_id(db: Session, destination_id: uuid.UUID) -> Destination | None:
+    return db.execute(select(Destination).where(Destination.id == destination_id)).scalar_one_or_none()
+
+
+def update_destination(db: Session, destination: Destination, data) -> Destination:
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(destination, field, value)
+    db.commit()
+    db.refresh(destination)
+    return destination
+
+
+def count_destination_dependencies(db: Session, destination_id: uuid.UUID) -> dict:
+    """Ushbu yo'nalishga bog'liq tours sonini qaytaradi (o'chirishdan oldin tekshirish uchun)."""
+    tours_count = db.execute(
+        select(func.count(func.distinct(tour_destinations.c.tour_id)))
+        .where(tour_destinations.c.destination_id == destination_id)
+    ).scalar_one()
+    return {"tours": tours_count}
+
+
+def delete_destination(db: Session, destination: Destination) -> None:
+    db.delete(destination)
+    db.commit()
