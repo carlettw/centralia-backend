@@ -77,6 +77,31 @@ class TourPricingOptionCreate(BaseModel):
     max_people: int | None = None
 
 
+class RoutePointCreate(BaseModel):
+    """Xarita/marshrut nuqtasi. type: 'start' | 'stop' | 'end'."""
+    order: int
+    type: str
+    name: dict  # {"uz": "...", "ru": "...", "en": "..."}
+    address: dict | None = None  # faqat start/end uchun to'liq manzil, {uz,ru,en}
+    activity_type: str | None = None  # "photo_stop" | "guided_tour" | "shopping" (faqat "stop" uchun)
+    duration_minutes: int | None = None
+    has_extra_fee: bool | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+
+
+class RoutePointOut(BaseModel):
+    order: int
+    type: str
+    name: Any  # dict yoki lang= berilganda string
+    address: Any | None = None
+    activity_type: str | None = None
+    duration_minutes: int | None = None
+    has_extra_fee: bool | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+
+
 class ReviewOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
@@ -128,13 +153,15 @@ class TourDetail(TourListItem):
     min_age: int | None = None
     fitness_level: int | None = None
 
-    highlights: Any | None = None
-    included: Any | None = None
-    excluded: Any | None = None
+    # dict[str, list[str]] (masalan {"uz": ["...", "..."]}) - yoki lang= berilganda list[str]
+    highlights: dict[str, list[str]] | list[str] | None = None
+    included: dict[str, list[str]] | list[str] | None = None
+    excluded: dict[str, list[str]] | list[str] | None = None
 
     faqs: list[TourFaqItem] = []
     map_embed_url: str | None = None
     pricing_options: list[TourPricingOptionOut] = []
+    route_points: list[RoutePointOut] = []
 
 
 class TourCreate(BaseModel):
@@ -158,12 +185,14 @@ class TourCreate(BaseModel):
     technical_level: int | None = None
     min_age: int | None = None
     fitness_level: int | None = None
-    highlights: dict | None = None
-    included: dict | None = None
-    excluded: dict | None = None
+    # {"uz": ["...", "..."], "ru": [...], "en": [...]} - har bir til uchun matnlar massivi
+    highlights: dict[str, list[str]] | None = None
+    included: dict[str, list[str]] | None = None
+    excluded: dict[str, list[str]] | None = None
     faqs: list[dict] = []
     map_embed_url: str | None = None
     pricing_options: list[TourPricingOptionCreate] = []
+    route_points: list[RoutePointCreate] = []
 
 
 class TourUpdate(BaseModel):
@@ -187,9 +216,10 @@ class TourUpdate(BaseModel):
     technical_level: int | None = None
     min_age: int | None = None
     fitness_level: int | None = None
-    highlights: dict | None = None
-    included: dict | None = None
-    excluded: dict | None = None
+    highlights: dict[str, list[str]] | None = None
+    included: dict[str, list[str]] | None = None
+    excluded: dict[str, list[str]] | None = None
     faqs: list[dict] | None = None
     map_embed_url: str | None = None
     pricing_options: list[TourPricingOptionCreate] | None = None
+    route_points: list[RoutePointCreate] | None = None
