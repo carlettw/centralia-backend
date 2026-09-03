@@ -43,6 +43,15 @@ def _base_query():
     )
 
 
+def _list_query():
+    """Ro'yxat (kartochka) ko'rinishi uchun yengil so'rov - faqat TourListItem uchun kerak bo'lgan
+    bog'lanishlarni yuklaydi (countries). Bu har bir ortiqcha selectinload bilan qo'shiladigan
+    tarmoq aylanishini (round-trip) kamaytiradi - ayniqsa backend va baza turli mintaqada bo'lganda muhim."""
+    return select(Tour).options(
+        selectinload(Tour.countries),
+    )
+
+
 def get_by_slug(db: Session, slug: str) -> Tour | None:
     return db.execute(_base_query().where(Tour.slug == slug)).scalar_one_or_none()
 
@@ -63,7 +72,7 @@ def list_tours(
     search: str | None = None,
     featured: bool | None = None,
 ) -> tuple[list[Tour], int]:
-    query = _base_query().where(Tour.is_active == True)  # noqa: E712
+    query = _list_query().where(Tour.is_active == True)  # noqa: E712
 
     if country_slug:
         query = query.join(Tour.countries).where(Country.slug == country_slug)
